@@ -1,0 +1,46 @@
+name: Frontend CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # Job 1: Build Frontend Docker Image
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      # Build the frontend Docker image
+      - name: Build frontend image
+        run: |
+          cd frontend
+          docker build -t frontend:latest .
+
+  # Job 2: Deploy Frontend to Contabo VPS
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Contabo VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.CONTABO_HOST }}
+          username: ${{ secrets.CONTABO_USER }}
+          key: ${{ secrets.SSH_KEY }}  # SSH Key stored in GitHub Secrets (with the name SSH_KEY)
+          script: |
+            # SSH into VPS and pull the latest frontend Docker image
+            docker pull frontend:latest
+            # Change to the directory where docker-compose.yml is located
+            cd /path/to/your/project/frontend
+            # Use Docker Compose to bring up the frontend service
+            docker-compose -f docker-compose.frontend.yml up -d
+
