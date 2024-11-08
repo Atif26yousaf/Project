@@ -23,9 +23,8 @@ jobs:
       - name: Build frontend image
         run: |
           # Change to the frontend directory before building the Docker image
-          cd /home/atif/Project/frontend
-          # Build the image from the Dockerfile in the frontend directory
-          docker build -f Dockerfile -t frontend:latest .
+          cd frontend
+          docker build -t frontend:latest .
 
   # Job 2: Deploy Frontend to Contabo VPS
   deploy:
@@ -41,10 +40,8 @@ jobs:
           script: |
             # SSH into VPS and pull the latest frontend Docker image
             docker pull frontend:latest
-            # Change to the directory where docker-compose.yml is located on the VPS
-            cd /home/atif/Project/frontend  # Update the path to your frontend directory
+            # Change to the directory where docker-compose.yml is located
+            cd /path/to/your/project/frontend
             # Use Docker Compose to bring up the frontend service
             docker-compose -f docker-compose.frontend.yml up -d
-            # Optionally run frontend image directly (if needed)
-            docker run -d -p 3000:80 frontend:latest
 
